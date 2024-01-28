@@ -1,0 +1,90 @@
+﻿@page "/"
+@using CV_Maker.Models
+@using CV_Maker.Services
+@inject IConfiguration config
+
+@inject ChatGptService chatGptService
+
+<PageTitle>Chat with GPT-3.5-Turbo</PageTitle>
+
+<style>
+    .chat-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.messages {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.user-message {
+    margin-bottom: 5px;
+}
+
+.gpt-message {
+    margin-bottom: 10px;
+}
+
+.thinking-indicator {
+    color: #555;
+    font-style: italic;
+}
+
+.input-section {
+    display: flex;
+}
+
+input {
+    flex: 1;
+    padding: 5px;
+}
+
+.send-button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+}
+</style>
+
+<div class="chat-container">
+    <div class="messages">
+        <div class="user-message">
+            <strong>User:</strong> @userInput
+        </div>
+
+        <div class="gpt-message">
+            <strong>ChatGPT:</strong>
+            @if (isThinking)
+            {
+                <span class="thinking-indicator">Thinking...</span>
+            }
+            else
+            {
+                @gptResponse
+            }
+        </div>
+    </div>
+
+    <div class="input-section">
+        <input @bind="userInput" placeholder="Type your message..." />
+        <button @onclick="SendMessage" class="send-button">Send</button>
+    </div>
+</div>
+
+@code {
+    private string userInput = "";
+    private string gptResponse = "";
+    private bool isThinking = false;
+
+    private async Task SendMessage()
+    {
+        isThinking = true;
+        gptResponse = await chatGptService.GetGptResponseAsync(userInput);
+        isThinking = false;
+        userInput = ""; // Clear the input after sending a message
+    }
+}
